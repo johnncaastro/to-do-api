@@ -1,11 +1,17 @@
 import { fastify } from 'fastify'
-import { DatabaseMemory } from './database-memory.js'
+import cors from '@fastify/cors'
 import { DatabasePostgres } from './database-postgres.js'
 
 // const database = new DatabaseMemory()
 const database = new DatabasePostgres()
 
 const server = fastify()
+
+server.register(cors, {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+})
 
 server.get('/tasks', async (request, reply) => {
   const search = request.query.search
