@@ -8,9 +8,9 @@ const database = new DatabasePostgres()
 const server = fastify()
 
 server.register(cors, {
-  origin: ['http://localhost:3334', 'https://to-do-iota-five.vercel.app/'],
+  origin: ['http://localhost:3334', 'https://to-do-iota-five.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
+  credentials: true
 })
 
 server.get('/tasks', async (request, reply) => {
