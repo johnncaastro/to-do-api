@@ -21,9 +21,9 @@ server.get('/tasks', async (request, reply) => {
 })
 
 server.post('/tasks', async (request, reply) => {
-  const { title } = request.body
+  const { title, task_group } = request.body
 
-  await database.create(title)
+  await database.create({ title, task_group })
 
   reply.status(201).send()
 })

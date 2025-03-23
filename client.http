@@ -6,7 +6,8 @@ POST http://localhost:3333/tasks
 content-type: application/json
 
 {
-  "title": "react"
+  "title": "react",
+  "task_group": "estudo"
 }
 
 ###

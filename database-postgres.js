@@ -18,10 +18,12 @@ export class DatabasePostgres {
     return tasks
   }
 
-  async create(taskTitle) {
+  async create(task) {
     const id = randomUUID()
 
-    await sql`INSERT INTO tasks (id, title) VALUES (${id}, ${taskTitle})`
+    await sql`
+      INSERT INTO tasks (id, title, task_group) 
+      VALUES (${id}, ${task.title}, ${task.task_group})`
   }
 
   async update(taskId, task) {
