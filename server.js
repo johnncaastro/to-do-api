@@ -2,7 +2,6 @@ import { fastify } from 'fastify'
 import cors from '@fastify/cors'
 import { DatabasePostgres } from './database-postgres.js'
 
-// const database = new DatabaseMemory()
 const database = new DatabasePostgres()
 
 const server = fastify()
@@ -22,32 +21,56 @@ server.get('/tasks', async (request, reply) => {
 })
 
 server.post('/tasks', async (request, reply) => {
-  const { title, items } = request.body
+  const { title } = request.body
 
-  await database.create({ title, items })
+  await database.create(title)
 
   reply.status(201).send()
 })
 
 server.put('/tasks/:id', async (request, reply) => {
   const id = request.params.id
-  const { title, items } = request.body
+  const { title, task_group } = request.body
 
-  await database.update(id, { title, items })
+  const taskExists = await database.list(id)
+
+  if (taskExists.length === 0) {
+    reply.status(404).send()
+
+    return
+  }
+
+  await database.update(id, { title, task_group })
 
   reply.status(204).send()
 })
 
-server.put('/tasks/item/completed/:id', async (request, reply) => {
-  const id = Number(request.params.id)
+server.patch('/tasks/:id/completed', async (request, reply) => {
+  const id = request.params.id
 
-  await database.updateCompletedItems(id)
+  const taskExists = await database.list(id)
+
+  if (taskExists.length === 0) {
+    reply.status(404).send()
+
+    return
+  }
+
+  await database.updateIsCompletedTask(taskExists)
 
   reply.status(204).send()
 })
 
 server.delete('/tasks/:id', async (request, reply) => {
   const id = request.params.id
+
+  const taskExists = await database.list(id)
+
+  if (taskExists.length === 0) {
+    reply.status(404).send()
+
+    return
+  }
 
   await database.delete(id)
 
@@ -58,15 +81,3 @@ server.listen({
   host: '0.0.0.0',
   port: process.env.PORT ?? 3333
 })
-
-// GET, POST, PUT, PATCH, DELETE
-
-// GET - OBTER DADOS
-// POST - CRIAR DADOS
-// PUT - ATUALIZAR TODO O DADO
-// PATCH - ATUALIZAR UMA INFORMAÇÃO REFERENTE AO DADO
-// DELETE - REMOVER DADOS
-
-// CRUD - CREATE, READ, UPDATE E DELETE
-
-// request body, route parameter, query params/search params

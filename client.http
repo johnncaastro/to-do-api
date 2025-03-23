@@ -1,0 +1,31 @@
+GET http://localhost:3333/tasks
+
+###
+
+POST http://localhost:3333/tasks
+content-type: application/json
+
+{
+  "title": "react"
+}
+
+###
+
+PUT http://localhost:3333/tasks/63d75ed2-cc27-43dd-8f50-2f02bf915608
+content-type: application/json
+
+{
+  "title": "nodejs",
+  "task_group": "estudo"
+}
+
+###
+
+PATCH http://localhost:3333/tasks/1d2d767c-6331-4491-a3fc-fcd0e6b5ffe5/completed
+content-type: application/json
+
+{}
+
+###
+
+DELETE http://localhost:3333/tasks/6fb4

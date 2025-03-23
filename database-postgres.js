@@ -7,47 +7,34 @@ export class DatabasePostgres {
     let tasks = ''
     
     if(search) {
-      tasks = await sql`select * from tasks where title ilike ${'%' + search + '%'}`
+      tasks = await sql`
+        SELECT id, title, is_complete, task_group 
+        FROM tasks WHERE title ILIKE ${'%' + search + '%'} OR id = ${search}
+      `
     } else {
-      tasks = await sql`select * from tasks`
+      tasks = await sql`SELECT id, title, is_complete, task_group FROM tasks`
     }
 
-    const tasksItems = await sql`select * from items`
-
-    const tasksWithItems = tasks.map(task => {
-      return {
-        ...task,
-        items: tasksItems.filter(item => item.task_id === task.id)
-      }
-    })
-
-    return tasksWithItems
+    return tasks
   }
 
-  async create(task) {
+  async create(taskTitle) {
     const id = randomUUID()
 
-    await sql`insert into tasks (id, title) VALUES (${id}, ${task.title})`
-
-    task.items.map(async (item) => {
-      return await sql`insert into items (name, task_id) VALUES (${item.name}, ${id})`
-    })
+    await sql`INSERT INTO tasks (id, title) VALUES (${id}, ${taskTitle})`
   }
 
   async update(taskId, task) {
-    await sql`update tasks set title = ${task.title} WHERE id = ${taskId}`
-
-    task.items.map(async (item) => {
-      return await sql`update items set name = ${item.name} WHERE id = ${item.id}`
-    })
+    await sql`
+      UPDATE tasks SET title = ${task.title}, task_group = ${task.task_group} 
+      WHERE id = ${taskId}
+    `
   }
 
-  async updateCompletedItems(itemId) {
-    const tasksItems = await sql`select * from items`
+  async updateIsCompletedTask(task) {
+    const [{ id, is_complete }] = task
 
-    const currentItem = tasksItems.filter(item => item.id === itemId)
-
-    await sql`update items set is_complete = ${!currentItem[0].is_complete} WHERE id = ${itemId}`
+    await sql`UPDATE tasks SET is_complete = ${!is_complete} WHERE id = ${id}`
   }
 
   async delete(id) {
