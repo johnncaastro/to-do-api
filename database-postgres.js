@@ -3,16 +3,43 @@ import { sql } from './db.js'
 
 export class DatabasePostgres {
 
-  async list(search) {
+  async list(params) {
     let tasks = ''
-    
-    if(search) {
+    let taskStatusFilter = null
+
+    if (params.status === 'finished') {
+      taskStatusFilter = true
+    } else if (params.status === 'no-finished') {
+      taskStatusFilter = false
+    }
+
+    if (Object.keys(params).length !== 0) {
+      tasks = await sql`
+      SELECT id, title, is_complete, task_group 
+      FROM tasks WHERE ${
+        params.name
+          ? sql`title ILIKE ${'%' + params.name + '%'}`
+          : sql`title ILIKE ${'%'}`
+      } AND ${
+        taskStatusFilter !== null
+          ? sql`is_complete = ${taskStatusFilter}`
+          : sql`is_complete IN (${true}, ${false})`
+      } AND ${
+        params.group
+          ? sql`task_group = ${params.group}`
+          : sql`task_group ILIKE ${'%'}`
+      }
+    `
+    } else if (typeof params === 'string') {
       tasks = await sql`
         SELECT id, title, is_complete, task_group 
-        FROM tasks WHERE title ILIKE ${'%' + search + '%'} OR id = ${search}
+        FROM tasks WHERE id = ${params}
       `
     } else {
-      tasks = await sql`SELECT id, title, is_complete, task_group FROM tasks`
+      tasks = await sql`
+        SELECT id, title, is_complete, task_group 
+        FROM tasks
+      `
     }
 
     return tasks

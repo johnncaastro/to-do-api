@@ -8,14 +8,14 @@ const server = fastify()
 
 server.register(cors, {
   origin: ['http://localhost:3334', 'https://to-do-iota-five.vercel.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true
 })
 
 server.get('/tasks', async (request, reply) => {
-  const search = request.query.search
+  const params = request.query
 
-  const tasks = await database.list(search)
+  const tasks = await database.list(params)
 
   return tasks
 })
