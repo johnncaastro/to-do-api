@@ -3,7 +3,9 @@ import { sql } from './db.js'
 
 export class DatabasePostgres {
 
-  async list(params) {
+  // TASKS
+
+  async list(params, userEmail) {
     let tasks = ''
     let taskStatusFilter = null
 
@@ -13,10 +15,10 @@ export class DatabasePostgres {
       taskStatusFilter = false
     }
 
-    if (Object.keys(params).length !== 0) {
+    if (params.name || taskStatusFilter !== null || params.group) {
       tasks = await sql`
-      SELECT id, title, is_complete, task_group 
-      FROM tasks WHERE ${
+      SELECT id, title, is_complete, task_group, user_email
+      FROM tasks WHERE user_email = ${userEmail} AND ${
         params.name
           ? sql`title ILIKE ${'%' + params.name + '%'}`
           : sql`title ILIKE ${'%'}`
@@ -32,25 +34,25 @@ export class DatabasePostgres {
     `
     } else if (typeof params === 'string') {
       tasks = await sql`
-        SELECT id, title, is_complete, task_group 
+        SELECT id, is_complete 
         FROM tasks WHERE id = ${params}
       `
     } else {
       tasks = await sql`
         SELECT id, title, is_complete, task_group 
-        FROM tasks
+        FROM tasks WHERE user_email = ${userEmail}
       `
     }
 
     return tasks
   }
 
-  async create(task) {
+  async create(task, userEmail) {
     const id = randomUUID()
 
     await sql`
-      INSERT INTO tasks (id, title, task_group) 
-      VALUES (${id}, ${task.title}, ${task.task_group})`
+      INSERT INTO tasks (id, title, task_group, user_email) 
+      VALUES (${id}, ${task.title}, ${task.task_group}, ${userEmail})`
   }
 
   async update(taskId, task) {
@@ -67,6 +69,19 @@ export class DatabasePostgres {
   }
 
   async delete(id) {
-    await sql`delete from tasks where id = ${id}`
+    await sql`DELETE FROM tasks WHERE id = ${id}`
+  }
+
+  // USERS
+
+  async createUser(user) {
+    const userExists = await sql`
+      SELECT display_name FROM users WHERE email = ${user.email}`
+    
+    if (!userExists) {
+      await sql`
+        INSERT INTO users (email, display_name)
+        VALUES (${user.email}, ${user.name})`
+    }
   }
 }

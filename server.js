@@ -12,18 +12,21 @@ server.register(cors, {
   credentials: true
 })
 
-server.get('/tasks', async (request, reply) => {
-  const params = request.query
+// TASKS ROUTES
 
-  const tasks = await database.list(params)
+server.get('/tasks/:email', async (request, reply) => {
+  const params = request.query
+  const userEmail = request.params.email
+
+  const tasks = await database.list(params, userEmail)
 
   return tasks
 })
 
 server.post('/tasks', async (request, reply) => {
-  const { title, task_group } = request.body
+  const { title, task_group, userEmail } = request.body
 
-  await database.create({ title, task_group })
+  await database.create({ title, task_group }, userEmail)
 
   reply.status(201).send()
 })
@@ -75,6 +78,21 @@ server.delete('/tasks/:id', async (request, reply) => {
   await database.delete(id)
 
   reply.status(204).send()
+})
+
+// USERS ROUTES
+
+server.post('/users/sign-in', (request, reply) => {
+  const { displayName, email } = request.body
+
+  const user = {
+    name: displayName,
+    email
+  }
+
+  database.createUser(user)
+
+  reply.status(201).send()
 })
 
 server.listen({
