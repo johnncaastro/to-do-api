@@ -75,10 +75,10 @@ export class DatabasePostgres {
   // USERS
 
   async createUser(user) {
-    const userExists = await sql`
+    const userArray = await sql`
       SELECT display_name FROM users WHERE email = ${user.email}`
     
-    if (!userExists) {
+    if (userArray.length === 0) {
       await sql`
         INSERT INTO users (email, display_name)
         VALUES (${user.email}, ${user.name})`

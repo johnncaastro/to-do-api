@@ -82,7 +82,7 @@ server.delete('/tasks/:id', async (request, reply) => {
 
 // USERS ROUTES
 
-server.post('/users/sign-in', (request, reply) => {
+server.post('/users/sign-in', async (request, reply) => {
   const { displayName, email } = request.body
 
   const user = {
@@ -90,7 +90,7 @@ server.post('/users/sign-in', (request, reply) => {
     email
   }
 
-  database.createUser(user)
+  await database.createUser(user)
 
   reply.status(201).send()
 })
